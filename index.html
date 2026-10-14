@@ -17,11 +17,11 @@
   --accent: #6d5efc;
   --accent-ink: #ffffff;
   --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
-  --bg: #f4f5f9;
+  --bg: #eceef5;
   --surface: #ffffff;
-  --fg: #14151c;
-  --muted: #6a6e80;
-  --line: #e2e4ee;
+  --fg: #0f1017;
+  --muted: #555a6e;
+  --line: #cfd4e2;
   --radius: 18px;
   --ease: cubic-bezier(.22, .8, .24, 1);
   --ease-soft: cubic-bezier(.4, 0, .2, 1);
@@ -30,20 +30,20 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e0f14;
-    --surface: #171922;
-    --fg: #eceef6;
-    --muted: #9298ac;
-    --line: #272b39;
+    --bg: #0b0c11;
+    --surface: #161924;
+    --fg: #eef0f7;
+    --muted: #a3a9bf;
+    --line: #2b3042;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0e0f14;
-  --surface: #171922;
-  --fg: #eceef6;
-  --muted: #9298ac;
-  --line: #272b39;
+  --bg: #0b0c11;
+  --surface: #161924;
+  --fg: #eef0f7;
+  --muted: #a3a9bf;
+  --line: #2b3042;
   color-scheme: dark;
 }
 
@@ -213,6 +213,25 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   transition: background-color .5s var(--ease-soft), color .5s var(--ease-soft);
 }
 .avatar-img { object-fit: cover; background: none; }
+.team-name {
+  font-family: Unbounded, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 6px 0 0;
+  text-wrap: balance;
+}
+.roster { margin-top: 12px; }
+.place {
+  flex: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background-color .5s var(--ease-soft), color .5s var(--ease-soft);
+}
 .link-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .pill {
   padding: 8px 14px;
@@ -457,6 +476,423 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+/* ===== Visual layer v2: тактический HUD-стиль, острые срезанные углы, свечение акцента ===== */
+:root {
+  --cut: 16px;
+  --grid: color-mix(in srgb, var(--fg) 5%, transparent);
+  --glow: color-mix(in srgb, var(--accent) 38%, transparent);
+  --accent-deep: color-mix(in srgb, var(--accent) 55%, #000);
+}
+body {
+  background:
+    radial-gradient(900px 520px at 90% -12%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 62%),
+    radial-gradient(760px 460px at -15% 35%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 65%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 65%);
+}
+
+.top { min-height: 56px; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.brand::before {
+  content: "";
+  width: 12px; height: 12px;
+  background: var(--accent);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  box-shadow: 0 0 14px var(--glow);
+  transition: background-color .5s var(--ease-soft), box-shadow .5s var(--ease-soft);
+}
+.iconbtn {
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  border: 0;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent);
+  transition: transform .2s var(--ease), background-color .4s var(--ease-soft);
+}
+.iconbtn:hover { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+
+/* Hero: глубокий градиент акцента, срез угла и блик при открытии */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 28px 22px 26px;
+  border-radius: 0;
+  background:
+    radial-gradient(420px 220px at 100% 0%, rgba(255, 255, 255, .22), transparent 60%),
+    linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  box-shadow: 0 30px 60px -34px var(--accent);
+}
+.hero::before {
+  content: "CSPS";
+  position: absolute;
+  right: -6px;
+  bottom: -26px;
+  z-index: -1;
+  font-family: Unbounded, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 96px;
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: rgba(255, 255, 255, .09);
+  pointer-events: none;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, .28) 50%, transparent 62%);
+  transform: translateX(-100%);
+  animation: sheen 1.6s var(--ease) .25s 1 both;
+  pointer-events: none;
+}
+@keyframes sheen { to { transform: translateX(100%); } }
+.eyebrow {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-bottom: 14px;
+  background: rgba(0, 0, 0, .22);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  font-size: 11px;
+  letter-spacing: .14em;
+}
+.hero h1 { font-size: 26px; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.12; }
+.hero .sub { font-size: 14px; max-width: 34ch; }
+
+/* Меню: нумерованные плитки со стрелкой, срез угла */
+.tiles { counter-reset: tile; gap: 10px; margin-top: 14px; }
+.tile {
+  counter-increment: tile;
+  position: relative;
+  overflow: hidden;
+  min-height: 136px;
+  justify-content: space-between;
+  padding: 18px 18px 16px;
+  border-radius: 0;
+  border-color: color-mix(in srgb, var(--accent) 20%, var(--line));
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--accent) 12%, var(--surface)) 0%, var(--surface) 62%);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  transition: transform .35s var(--ease), border-color .3s var(--ease-soft), box-shadow .35s var(--ease-soft);
+}
+.tile::before {
+  content: "0" counter(tile);
+  font-family: Unbounded, system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: var(--accent);
+  transition: color .5s var(--ease-soft);
+}
+.tile::after {
+  content: "→";
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  font-size: 20px;
+  color: var(--accent);
+  transition: transform .35s var(--ease);
+}
+.tile:hover { transform: translateY(-3px); box-shadow: 0 18px 34px -20px var(--glow); }
+.tile:hover::after { transform: translateX(5px); }
+.tile-t {
+  font-family: Unbounded, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  line-height: 1.2;
+  margin-top: 16px;
+}
+.tile-d { font-size: 13px; }
+
+/* Заголовки разделов с акцентной чертой */
+.title {
+  font-size: 19px;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  margin: 12px 0 14px;
+}
+.title::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 3px;
+  margin-top: 10px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--glow);
+  transition: background-color .5s var(--ease-soft);
+}
+.back { letter-spacing: .04em; font-size: 14px; text-transform: uppercase; }
+
+.search {
+  padding: 14px 16px;
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  border-color: transparent;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.search:focus { box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 4px var(--accent-soft); }
+
+/* Строки списков: срез угла, подсветка и акцентная полоска при наведении */
+.row {
+  position: relative;
+  border-radius: 0;
+  border-color: transparent;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  padding: 12px 14px 12px 16px;
+}
+.row::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transition: transform .3s var(--ease);
+}
+.row:hover {
+  transform: translateX(3px);
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.row:hover::before { transform: scaleY(1); }
+.avatar { border-radius: 0; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+.grow strong { font-size: 15px; }
+.place { border-radius: 0; clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 6px 12px; }
+
+/* Карточки и статистика */
+.card {
+  border-radius: 0;
+  border-color: transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, var(--surface)) 0%, var(--surface) 55%);
+  box-shadow: inset 0 0 0 1px var(--line);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  padding: 16px;
+}
+.label { color: var(--accent); font-size: 11px; letter-spacing: .14em; }
+.stat {
+  position: relative;
+  border-radius: 0;
+  border-color: transparent;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  box-shadow: inset 0 0 0 1px var(--line);
+  padding: 12px 12px 12px 14px;
+}
+.stat::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--accent);
+}
+.stat b { font-size: 18px; }
+.stat span { text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+.elo {
+  font-size: 15px;
+  padding: 4px 10px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+.kv dt { text-transform: uppercase; letter-spacing: .06em; font-size: 11px; padding-top: 2px; }
+.code-wrap { border-radius: 0; background: color-mix(in srgb, var(--fg) 6%, var(--surface)); box-shadow: inset 3px 0 0 var(--accent); }
+
+/* Кнопки и переключатели */
+.seg button {
+  border-radius: 0;
+  border-color: transparent;
+  background: color-mix(in srgb, var(--surface) 90%, var(--accent) 6%);
+  box-shadow: inset 0 0 0 1px var(--line);
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: 13px;
+}
+.seg button:hover { box-shadow: inset 0 0 0 1px var(--accent); }
+.seg button[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  box-shadow: 0 10px 22px -14px var(--accent);
+  border-color: transparent;
+}
+.btn {
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-size: 14px;
+}
+.ghost { border-radius: 0; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.pill { border-radius: 0; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.link { text-transform: uppercase; letter-spacing: .06em; font-size: 13px; }
+.swatch { border-radius: 0; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); width: 42px; height: 42px; border: 0; }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--fg); }
+.toggle { border-radius: 0; clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); border-color: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+
+/* Профиль игрока: фото сливается с фоном, плашка с ником поверх */
+.profile { margin: 0 -16px; height: 340px; }
+.profile img { -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 100%); mask-image: linear-gradient(to bottom, #000 45%, transparent 100%); }
+.profile::after { height: 55%; }
+.hero-title { font-size: 30px; text-transform: uppercase; }
+
+/* Генератор прицела: сцена с сеткой и срезом угла */
+.xh-stage {
+  border-radius: 0;
+  border: 0;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  background-image:
+    linear-gradient(color-mix(in srgb, #fff 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, #fff 6%, transparent) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.bg-dark { background-color: #07080b; }
+.bg-light { background-color: #e9ebf2; }
+.bg-map { background-color: #3f4f3c; }
+
+.tile:active, .row:active, .btn:active, .seg button:active { transform: scale(.97); }
+.view:not([hidden]) { animation: rise .55s var(--ease) both; }
+
+/* Плавная смена темы: на 0.6 с плавно перекрашиваем всё, потом убираем */
+html.theme-anim, html.theme-anim * {
+  transition: background-color .5s var(--ease-soft), border-color .5s var(--ease-soft),
+    color .4s var(--ease-soft), box-shadow .5s var(--ease-soft), fill .4s var(--ease-soft) !important;
+}
+
+/* Плитки меню: мозаика (две широкие и две обычные), в каждой живое превью раздела */
+.tiles { grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile-wide { grid-column: span 2; min-height: 180px; }
+.tile-wide .tile-t, .tile-wide .tile-d { position: relative; z-index: 1; }
+.tile:not(.tile-wide) { min-height: 176px; }
+/* Номер раздела уходит в угол, текст прижат вниз, превью сверху: ничего не перекрывает */
+.tile { justify-content: flex-end; }
+.tile::before { position: absolute; top: 18px; left: 18px; }
+.tile-t { margin-top: 0; }
+.tile-wide .tile-t { max-width: 48%; }
+
+.tile-photos { position: absolute; inset: 0; pointer-events: none; }
+.tile-photos img {
+  position: absolute;
+  top: 14px;
+  right: calc(14px + (var(--p) - 1) * 0px);
+  width: 92px;
+  height: 110px;
+  object-fit: cover;
+  object-position: center 20%;
+  border: 2px solid var(--surface);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  transition: transform .5s var(--ease);
+}
+.tile-photos img:nth-child(1) { right: 100px; transform: rotate(-4deg); z-index: 1; }
+.tile-photos img:nth-child(2) { right: 52px; transform: rotate(2deg); z-index: 2; }
+.tile-photos img:nth-child(3) { right: 4px; transform: rotate(6deg); z-index: 3; }
+.tile-wide:hover .tile-photos img:nth-child(1) { transform: rotate(-7deg) translateY(-4px); }
+.tile-wide:hover .tile-photos img:nth-child(2) { transform: rotate(0deg) translateY(-6px); }
+.tile-wide:hover .tile-photos img:nth-child(3) { transform: rotate(9deg) translateY(-2px); }
+
+.badges {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 92px;
+}
+.badge {
+  height: 38px;
+  display: grid;
+  place-items: center;
+  font-family: Unbounded, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, hsl(var(--h) 75% 58%), hsl(var(--h) 70% 38%));
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  transition: transform .4s var(--ease);
+}
+.tile:hover .badge { transform: translateY(-2px); }
+.tile:hover .badge:nth-child(2n) { transition-delay: .05s; }
+
+.xh-mini {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 80px;
+  height: 80px;
+  padding: 8px;
+  box-sizing: border-box;
+  background: #07080b;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  transition: transform .5s var(--ease);
+}
+.xh-mini svg { width: 100%; height: 100%; display: block; shape-rendering: crispEdges; }
+.tile:hover .xh-mini { transform: rotate(90deg); }
+
+.tile-big {
+  position: absolute;
+  top: 26px;
+  right: 16px;
+  font-family: Unbounded, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--accent);
+  text-shadow: 0 0 28px var(--glow);
+  font-variant-numeric: tabular-nums;
+  transition: transform .5s var(--ease);
+}
+.tile-wide:hover .tile-big { transform: translateX(-4px); }
+
+/* Плитки меню появляются по очереди */
+.tiles .tile { animation: rise .6s var(--ease) both; }
+.tiles .tile:nth-child(1) { animation-delay: .08s; }
+.tiles .tile:nth-child(2) { animation-delay: .16s; }
+.tiles .tile:nth-child(3) { animation-delay: .24s; }
+.tiles .tile:nth-child(4) { animation-delay: .32s; }
+
+/* Тёмная тема: без тяжёлого свечения, поверхности чуть светлее фона, акцент приглушён */
+:root[data-theme="dark"] .hero { box-shadow: 0 18px 40px -28px var(--accent); }
+:root[data-theme="dark"] .tile:hover { box-shadow: 0 14px 28px -22px var(--accent); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero { box-shadow: 0 18px 40px -28px var(--accent); }
+  :root:not([data-theme="light"]) .tile:hover { box-shadow: 0 14px 28px -22px var(--accent); }
+}
+
+/* Контраст: подписи и мелкий текст читаются в обеих темах */
+.label, .tile-d, .grow small { font-weight: 600; }
+.tile-d, .grow small { color: var(--muted); }
+.stat span { color: var(--muted); }
+
+/* Переключатель режима: три варианта в одну строку */
+.seg button { min-height: 44px; }
+.seg-row { flex-wrap: nowrap; }
+.seg-row button { flex: 1 1 0; min-width: 0; padding-inline: 6px; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -474,17 +910,36 @@ button:focus-visible, input:focus-visible, a:focus-visible {
         <p class="sub">Мышь, прицел, viewmodel и бинды лучших игроков в одном месте.</p>
       </div>
       <div class="tiles">
-        <button class="tile" data-go="list">
+        <button class="tile tile-wide" data-go="list">
+          <span class="tile-photos" aria-hidden="true">
+            <img src="monesy.jpg" alt="" style="--p:3">
+            <img src="donk.webp" alt="" style="--p:2">
+            <img src="s1mple.jpg" alt="" style="--p:1">
+          </span>
           <span class="tile-t">Про-игроки</span>
           <span class="tile-d" id="count"></span>
         </button>
-        <button class="tile" data-go="crosshair">
-          <span class="tile-t">Генератор прицела</span>
-          <span class="tile-d">Превью и команды</span>
+        <button class="tile" data-go="teams">
+          <span class="badges" aria-hidden="true">
+            <span class="badge" style="--h:265">SP</span>
+            <span class="badge" style="--h:210">FAL</span>
+            <span class="badge" style="--h:40">VIT</span>
+            <span class="badge" style="--h:0">MZ</span>
+          </span>
+          <span class="tile-t">Команды</span>
+          <span class="tile-d">Составы и результаты 2026</span>
         </button>
-        <button class="tile" data-go="faceit">
+        <button class="tile" data-go="crosshair">
+          <span class="xh-mini" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><rect x="31" y="8" width="2" height="16" fill="#00ff00"/><rect x="31" y="40" width="2" height="16" fill="#00ff00"/><rect x="8" y="31" width="16" height="2" fill="#00ff00"/><rect x="40" y="31" width="16" height="2" fill="#00ff00"/></svg>
+          </span>
+          <span class="tile-t">Прицел</span>
+          <span class="tile-d">Генератор и команды</span>
+        </button>
+        <button class="tile tile-wide" data-go="faceit">
+          <span class="tile-big" aria-hidden="true">3650</span>
           <span class="tile-t">Игроки Faceit</span>
-          <span class="tile-d">Настройки из Faceit</span>
+          <span class="tile-d">Настройки и ELO игроков Faceit</span>
         </button>
       </div>
     </section>
@@ -505,6 +960,14 @@ button:focus-visible, input:focus-visible, a:focus-visible {
       <div class="bar"><button class="back" data-go="home">‹ Назад</button></div>
       <h2 class="title">Тема</h2>
       <div class="card" style="--i:0">
+        <p class="label">Режим</p>
+        <div class="seg seg-row" role="group" aria-label="Режим оформления">
+          <button data-mode="system" aria-pressed="true">Авто</button>
+          <button data-mode="light" aria-pressed="false">Светлый</button>
+          <button data-mode="dark" aria-pressed="false">Тёмный</button>
+        </div>
+      </div>
+      <div class="card" style="--i:1">
         <p class="label">Цвет акцента</p>
         <div class="picker-row">
           <input id="picker" type="color" aria-label="Выбрать цвет">
@@ -513,11 +976,22 @@ button:focus-visible, input:focus-visible, a:focus-visible {
         <p class="label" style="margin-top:16px">Готовые</p>
         <div id="swatches" class="swatches"></div>
       </div>
-      <div class="card preview" style="--i:1">
+      <div class="card preview" style="--i:2">
         <p class="label" style="width:100%">Предпросмотр</p>
         <button class="btn">Кнопка</button>
         <button class="ghost" id="reset">Сбросить</button>
       </div>
+    </section>
+
+    <section class="view" data-view="teams" hidden>
+      <div class="bar"><button class="back" data-go="home">‹ Назад</button></div>
+      <h2 class="title">Команды</h2>
+      <ul id="teams" class="list"></ul>
+    </section>
+
+    <section class="view" data-view="teamdetail" hidden>
+      <div class="bar"><button class="back" data-go="teams">‹ Все команды</button></div>
+      <div id="teamdetail"></div>
     </section>
 
     <section class="view" data-view="crosshair" hidden>
@@ -605,8 +1079,9 @@ const PLAYERS = [
     crosshair: "CSGO-wAD3c-ykt5L-zvZ98-vBisR-6sWPA",
     viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5",
     video: "1280x960, 4:3 растянутое · ZOWIE XL2586X+ (600 Hz): DyAc 2 Premium, Black eQualizer 12, Color Vibrance 12, Low Blue Light 0, Gamer 1, яркость 100, контраст 50, резкость 10, Gamma 2, Normal, AMA High",
-    audio: "—", binds: "—", source: "", photo: "monesy.jpg",
-    links: [["HLTV", "https://www.hltv.org/player/19230/m0nesy"]] },
+    audio: "—", binds: "—", source: "", photo: "monesy.jpg", altNick: "m0NESY",
+    links: [["HLTV", "https://www.hltv.org/player/19230/m0nesy"]],
+    hltv: { rating: "1.23", kd: "1.30", adr: "77.2", kpr: "0.79", hs: "—", impact: "1.23" } },
   { nick: "donk", team: "Team Spirit",
     mouse: "Logitech G Pro X Superlight Magenta · 1000 Hz · Windows sens 4 · zoom 1",
     dpi: "800", sens: "1.25",
@@ -616,7 +1091,8 @@ const PLAYERS = [
     audio: "—", binds: "—",
     graphics: "Boost Players Contrast вкл · модели, текстуры, шейдеры, частицы: низкая · фильтрация Trilinear · MSAA 8x · тени: высокая · окружающее затенение выкл · FSR выкл · NVIDIA Reflex выкл · G-Sync выкл",
     source: "", photo: "donk.webp",
-    links: [["HLTV", "https://www.hltv.org/player/21167/donk"]] },
+    links: [["HLTV", "https://www.hltv.org/player/21167/donk"]],
+    hltv: { rating: "1.32", kd: "1.32", adr: "91.2", kpr: "0.89", hs: "64.5%", impact: "1.48" } },
   { nick: "Kyousuke", team: "Максим Лукин",
     mouse: "Logitech G Pro X Superlight 2 Magenta · 1000 Hz · Windows sens 6 · zoom 1",
     dpi: "800", sens: "1.28",
@@ -625,7 +1101,8 @@ const PLAYERS = [
     video: "1280x960, 4:3 растянутое, полноэкран, яркость 110% · HUD: Team Color, масштаб 1 · радар: масштаб 1, зум карты 0.3",
     audio: "—", binds: "—",
     graphics: "Boost Player Contrast выкл · V-Sync выкл · NVIDIA Reflex выкл · G-Sync выкл · FPS 500 · MSAA 8x · тени: глобальные низкие, динамические все · модели и текстуры низкие · фильтрация Bilinear · шейдеры низкие · частицы низкие · AO выкл · FSR выкл",
-    source: "" },
+    source: "",
+    hltv: { rating: "1.18", kd: "1.19", adr: "81.4", kpr: "0.76", hs: "—", impact: "1.19" } },
   { nick: "focusbtw", team: "Ютубер", faceit: true,
     mouse: "—", dpi: "—", sens: "—",
     crosshair: "CSGO-8hdPr-VQFmM-aHpHS-ZrP38-3ZywQ",
@@ -634,7 +1111,7 @@ const PLAYERS = [
     audio: "—", binds: "—",
     graphics: "Параметры запуска: -novid -language english -tickrate 128 +cl_interp_ratio 1 -freq 240",
     source: "" },
-  { nick: "ZywOo", team: "—",
+  { nick: "ZywOo", team: "Team Vitality",
     mouse: "Pulsar ZywOo The Chosen Mouse Gen.2 · 1000 Hz · Windows sens 6 · zoom 1",
     dpi: "400", sens: "1.9",
     crosshair: "CSH2Rx7cGRU5apQ4VSnZwjsr9RyLEiOrCAaVYWYvW6dz7H",
@@ -642,7 +1119,8 @@ const PLAYERS = [
     video: "1024x768, 4:3 растянутое, полноэкран, яркость 93% · HUD: Team Color, масштаб 1 · радар: масштаб 1, зум карты 0.4",
     audio: "—", binds: "—",
     graphics: "Boost Player Contrast вкл · V-Sync выкл · NVIDIA Reflex вкл · G-Sync выкл · FPS 400 · MSAA 4x · тени: глобальные высокие, динамические все · модели и текстуры высокие · фильтрация Anisotropic 4x · шейдеры высокие · частицы высокие · AO средняя · FSR выкл · параметры запуска: -novid -tickrate 128 -allow_third_party_software",
-    source: "" },
+    source: "",
+    hltv: { rating: "1.32", kd: "1.36", adr: "85.8", kpr: "0.83", hs: "—", impact: "1.38" } },
   { nick: "sh1ro", team: "—",
     mouse: "Logitech G Pro X Superlight 2 White · 1000 Hz · Windows sens 6 · zoom 1",
     dpi: "800", sens: "1.04",
@@ -651,7 +1129,8 @@ const PLAYERS = [
     video: "1280x960, 4:3 растянутое, полноэкран, яркость 93% · HUD: White, масштаб 1.05 · радар: масштаб 1.05",
     audio: "—", binds: "—",
     graphics: "Boost Player Contrast вкл · V-Sync выкл · NVIDIA Reflex вкл · G-Sync выкл · FPS 500 · MSAA 4x · тени: глобальные высокие, динамические все · модели и текстуры высокие · фильтрация Anisotropic 2x · шейдеры высокие · частицы высокие · AO средняя · FSR выкл · параметры запуска: -console +exec autoexec.cfg",
-    source: "" },
+    source: "",
+    hltv: { rating: "1.25", kd: "1.38", adr: "78.4", kpr: "0.77", hs: "28.1%", impact: "1.18" } },
   { nick: "s1mple", team: "Александр Костылев",
     mouse: "Logitech G Pro X Superlight 2 Cyan · 1000 Hz · Windows sens 6 · zoom 1",
     dpi: "400", sens: "3.09",
@@ -700,6 +1179,7 @@ function show(name) {
   document.querySelectorAll(".view").forEach((v) => { v.hidden = v.dataset.view !== name; });
   if (name === "list") renderList($("#search").value);
   if (name === "faceit") renderFaceit();
+  if (name === "teams") renderTeams();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -736,6 +1216,198 @@ function renderFaceit() {
           el("strong", { text: p.nick }),
           el("small", { text: p.team })),
         el("span", { class: "chev", "aria-hidden": "true", text: "›" })))));
+}
+
+// Составы и результаты вносятся вручную. Если игрок есть в списке про-игроков, его карточка открывается по нажатию.
+const TEAMS = [
+  {
+    name: "Team Spirit",
+    roster: [
+      { nick: "donk", role: "Игрок" },
+      { nick: "sh1ro", role: "Игрок" },
+      { nick: "magixx", role: "Капитан / IGL" },
+      { nick: "zont1x", role: "Игрок" },
+      { nick: "tN1R", role: "Игрок" },
+      { nick: "hally", role: "Тренер" }
+    ],
+    results: [
+      { event: "Esports World Cup 2026", note: "Париж", result: "1 место" },
+      { event: "BLAST Open Fall 2026", note: "", result: "1 место" },
+      { event: "PGL Astana 2026", note: "", result: "1 место" },
+      { event: "BLAST Bounty Summer 2026", note: "Финал: поражение от MOUZ", result: "2 место" },
+      { event: "IEM Rio 2026", note: "Финал: поражение от Vitality", result: "2 место" },
+      { event: "ESL Pro League Season 24", note: "", result: "Top-4" },
+      { event: "IEM Cologne 2026", note: "", result: "Top-6" }
+    ]
+  },
+  {
+    name: "Team Falcons",
+    roster: [
+      { nick: "karrigan", role: "Капитан / IGL" },
+      { nick: "NiKo", role: "Игрок" },
+      { nick: "m0NESY", role: "Игрок" },
+      { nick: "TeSeS", role: "Игрок" },
+      { nick: "kyousuke", role: "Игрок" },
+      { nick: "zonic", role: "Тренер" }
+    ],
+    results: [
+      { event: "IEM Cologne Major 2026", note: "", result: "1 место" },
+      { event: "PGL Astana 2026", note: "", result: "2 место" },
+      { event: "CS Asia Championships 2026", note: "", result: "2 место" },
+      { event: "BLAST Bounty Winter 2026", note: "", result: "2 место" },
+      { event: "BLAST Open Fall 2026", note: "", result: "Top-3/4" },
+      { event: "IEM Rio 2026", note: "", result: "3 место" },
+      { event: "Esports World Cup 2026", note: "", result: "5–8 место" },
+      { event: "BLAST Open Spring 2026", note: "", result: "5–6 место" }
+    ]
+  },
+  {
+    name: "MOUZ",
+    roster: [
+      { nick: "torzsi", role: "Игрок" },
+      { nick: "xertioN", role: "Игрок" },
+      { nick: "Spinx", role: "Игрок" },
+      { nick: "PR", role: "Игрок" },
+      { nick: "xelex", role: "Игрок" },
+      { nick: "sycrone", role: "Тренер" }
+    ],
+    results: [
+      { event: "BLAST Bounty Summer 2026", note: "", result: "1 место" },
+      { event: "ESL Pro League Season 24", note: "Финал: поражение от Vitality", result: "2 место" },
+      { event: "BLAST Open Fall 2026", note: "", result: "2 место" },
+      { event: "PGL Astana 2026", note: "", result: "3–4 место" },
+      { event: "CS Asia Championships 2026", note: "", result: "3–4 место" },
+      { event: "PGL Cluj-Napoca 2026", note: "", result: "3–4 место" },
+      { event: "Esports World Cup 2026", note: "", result: "5–8 место" },
+      { event: "IEM Cologne 2026", note: "", result: "12 место" }
+    ]
+  },
+  {
+    name: "Team Vitality",
+    roster: [
+      { nick: "apEX", role: "Капитан / IGL" },
+      { nick: "ZywOo", role: "Игрок" },
+      { nick: "flameZ", role: "Игрок" },
+      { nick: "mezii", role: "Игрок" },
+      { nick: "ropz", role: "Игрок" },
+      { nick: "XTQZZZ", role: "Тренер" }
+    ],
+    results: [
+      { event: "ESL Pro League Season 24", note: "", result: "1 место" },
+      { event: "IEM Rio 2026", note: "", result: "1 место" },
+      { event: "PGL Astana 2026", note: "", result: "2 место" },
+      { event: "BLAST Open Spring 2026", note: "", result: "2 место" },
+      { event: "Esports World Cup 2026", note: "", result: "Top-3/4" },
+      { event: "BLAST Bounty Summer 2026", note: "", result: "Top-3/4" },
+      { event: "IEM Cologne 2026", note: "", result: "Top-4" }
+    ]
+  },
+  {
+    name: "FURIA Esports",
+    roster: [
+      { nick: "KSCERATO", role: "Рифлер / Звезда", stats: "Rating 1.18 · K/D 1.20 · ADR 80.5 · Impact 1.16" },
+      { nick: "molodoy", role: "Снайпер / AWP", stats: "Rating 1.16 · K/D 1.18 · ADR 76.2 · Impact 1.12" },
+      { nick: "yuurih", role: "Рифлер", stats: "Rating 1.11 · K/D 1.09 · ADR 77.8 · Impact 1.08" },
+      { nick: "YEKINDAR", role: "Энтри-фраггер", stats: "Rating 1.08 · K/D 1.02 · ADR 78.9 · Impact 1.19" },
+      { nick: "FalleN", role: "Капитан / IGL", stats: "Rating 1.03 · K/D 1.04 · ADR 67.8 · Impact 0.98" }
+    ],
+    results: [
+      { event: "IEM Cologne Major 2026", note: "Финал", result: "2 место" },
+      { event: "Esports World Cup 2026", note: "", result: "3–4 место" },
+      { event: "ESL Pro League Season 24", note: "", result: "5–8 место" },
+      { event: "PGL Astana 2026", note: "", result: "5–8 место" },
+      { event: "IEM Rio 2026", note: "", result: "5–6 место" }
+    ]
+  },
+  {
+    name: "NAVI",
+    roster: [
+      { nick: "w0nderful", role: "Снайпер / AWP", stats: "Rating 1.12 · K/D 1.14 · ADR 72.9 · Impact 1.06" },
+      { nick: "b1t", role: "Рифлер / Хедшотер", stats: "Rating 1.09 · K/D 1.08 · ADR 74.8 · Impact 1.04" },
+      { nick: "iM", role: "Рифлер / Энтри", stats: "Rating 1.07 · K/D 1.02 · ADR 75.1 · Impact 1.08" },
+      { nick: "Aleksib", role: "Капитан / IGL", stats: "Rating 0.96 · K/D 0.90 · ADR 66.2 · Impact 0.89" },
+      { nick: "makazze", role: "Рифлер", stats: "Rating 1.08 · K/D 1.05 · ADR 73.5 · Impact 1.02" }
+    ],
+    results: [
+      { event: "BLAST Open Spring 2026", note: "", result: "1 место" },
+      { event: "IEM Cologne Major 2026", note: "", result: "3–4 место" },
+      { event: "Esports World Cup 2026", note: "", result: "3–4 место" },
+      { event: "PGL Astana 2026", note: "", result: "5–8 место" },
+      { event: "ESL Pro League Season 24", note: "", result: "9–12 место" }
+    ]
+  },
+  {
+    name: "G2 Esports",
+    roster: [
+      { nick: "NertZ", role: "Рифлер / Звезда", stats: "Rating 1.14 · K/D 1.11 · ADR 78.4 · Impact 1.13" },
+      { nick: "r1nkle", role: "Снайпер / AWP", stats: "Rating 1.13 · K/D 1.15 · ADR 74.6 · Impact 1.09" },
+      { nick: "huNter-", role: "Капитан / IGL", stats: "Rating 1.10 · K/D 1.07 · ADR 76.5 · Impact 1.06" },
+      { nick: "HeavyGod", role: "Рифлер / Энтри", stats: "Rating 1.11 · K/D 1.09 · ADR 77.2 · Impact 1.10" },
+      { nick: "MATYS", role: "Саппорт / Рифлер", stats: "Rating 1.07 · K/D 1.04 · ADR 73.1 · Impact 1.01" }
+    ],
+    results: [
+      { event: "Stake Ranked Episode 1", note: "", result: "1 место" },
+      { event: "FISSURE Playground #3", note: "", result: "2 место" },
+      { event: "IEM Kraków 2026", note: "", result: "5–6 место" },
+      { event: "BLAST Open Fall 2026", note: "", result: "5–6 место" },
+      { event: "IEM Cologne Major 2026", note: "", result: "5–8 место" },
+      { event: "Esports World Cup 2026", note: "", result: "5–8 место" },
+      { event: "PGL Astana 2026", note: "", result: "5–8 место" }
+    ]
+  }
+];
+
+function rosterRow(m, i) {
+  const nick = typeof m === "string" ? m : m.nick;
+  const role = typeof m === "string" ? "" : m.role;
+  const stats = typeof m === "string" ? "" : (m.stats || "");
+  const low = nick.toLowerCase();
+  const p = PLAYERS.find((x) => x.nick.toLowerCase() === low || (x.altNick && x.altNick.toLowerCase() === low));
+  const avatar = p && p.photo
+    ? el("img", { class: "avatar avatar-img", src: p.photo, alt: "" })
+    : el("span", { class: "avatar", text: nick.slice(-1) });
+  const info = el("span", { class: "grow" },
+    el("strong", { text: nick }),
+    el("small", { text: [role, p ? "Настройки есть" : (stats || "Настройки пока не добавлены")].filter(Boolean).join(" · ") }));
+  return el("li", {},
+    p
+      ? el("button", { class: "row", style: `--i:${i}`, onclick: () => openPlayer(p) },
+          avatar, info, el("span", { class: "chev", "aria-hidden": "true", text: "›" }))
+      : el("div", { class: "row static", style: `--i:${i}` }, avatar, info));
+}
+
+function resultRow(r, i) {
+  return el("li", {},
+    el("div", { class: "row static", style: `--i:${i}` },
+      el("span", { class: "grow" },
+        el("strong", { text: r.event }),
+        el("small", { text: r.note || "—" })),
+      el("span", { class: "place", text: r.result })));
+}
+
+function renderTeams() {
+  $("#teams").replaceChildren(...TEAMS.map((t, i) =>
+    el("li", {},
+      el("button", { class: "row", style: `--i:${i}`, onclick: () => openTeam(t) },
+        el("span", { class: "avatar", text: t.name.slice(0, 1) }),
+        el("span", { class: "grow" },
+          el("strong", { text: t.name }),
+          el("small", { text: `${t.roster.length} игроков · ${t.results.length} результатов в 2026` })),
+        el("span", { class: "chev", "aria-hidden": "true", text: "›" })))));
+}
+
+function openTeam(t) {
+  $("#teamdetail").replaceChildren(
+    el("div", { class: "hero" },
+      el("p", { class: "eyebrow", text: "Команда CS2" }),
+      el("h2", { class: "hero-title", text: t.name })),
+    el("div", { class: "card", style: "--i:0" },
+      el("p", { class: "label", text: "Состав" }),
+      el("ul", { class: "list roster" }, ...t.roster.map((nick, i) => rosterRow(nick, i)))),
+    el("div", { class: "card", style: "--i:1" },
+      el("p", { class: "label", text: "Результаты 2026" }),
+      el("ul", { class: "list roster" }, ...t.results.map((r, i) => resultRow(r, i)))));
+  show("teamdetail");
 }
 
 function edpi(p) {
@@ -789,6 +1461,17 @@ function faceitCard(s, i) {
       stat("K/R", s.kr, 0), stat("HS%", s.hs, 1), stat("ADR", s.adr, 2)));
 }
 
+function hltvCard(s, i) {
+  return el("div", { class: "card", style: `--i:${i}` },
+    el("div", { class: "head" },
+      el("span", { class: "label", text: "HLTV · Rating 2.0" }),
+      el("b", { class: "elo", text: s.rating })),
+    el("div", { class: "stats" },
+      stat("K/D", s.kd, 0), stat("ADR", s.adr, 1), stat("Impact", s.impact, 2)),
+    el("div", { class: "stats" },
+      stat("KPR", s.kpr, 0), stat("HS%", s.hs, 1)));
+}
+
 function linksCard(links, i) {
   return el("div", { class: "card", style: `--i:${i}` },
     el("p", { class: "label", text: "Профили" }),
@@ -797,8 +1480,8 @@ function linksCard(links, i) {
         el("a", { class: "pill", href: url, target: "_blank", rel: "noopener", text: name }))));
 }
 
-function openPlayer(p) {
-  $("#detail").replaceChildren(...[
+function buildSettings(p) {
+  return [
     p.photo ? el("div", { class: "profile" }, el("img", { src: p.photo, alt: p.nick })) : null,
     el("div", { class: "hero" },
       el("p", { class: "eyebrow", text: p.team }),
@@ -813,7 +1496,35 @@ function openPlayer(p) {
     p.stats ? faceitCard(p.stats, 6) : null,
     p.links ? linksCard(p.links, 7) : null,
     p.source ? el("a", { class: "link", href: p.source, target: "_blank", rel: "noopener" }, "Источник ↗") : null
-  ].filter(Boolean));
+  ].filter(Boolean);
+}
+
+function buildStats(p) {
+  const out = [];
+  if (p.hltv) out.push(hltvCard(p.hltv, 0));
+  if (p.stats) out.push(faceitCard(p.stats, out.length));
+  if (out.length) return out;
+  return [el("div", { class: "card", style: "--i:0" },
+    el("p", { class: "label", text: "Статистика" }),
+    el("p", { class: "note", text: "Статистика пока не добавлена." }))];
+}
+
+function openPlayer(p) {
+  const settings = el("div", { class: "tab-panel" }, ...buildSettings(p));
+  const stats = el("div", { class: "tab-panel" }, ...buildStats(p));
+  stats.hidden = true;
+  const tabBtn = (id, label, on) => el("button", {
+    class: "tab", "aria-pressed": String(on), "data-tab": id,
+    onclick: () => {
+      settings.hidden = id !== "settings";
+      stats.hidden = id !== "stats";
+      tabs.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === id)));
+    }
+  }, label);
+  const tabs = el("div", { class: "seg tabs" },
+    tabBtn("settings", "Настройки", true),
+    tabBtn("stats", "Статистика", false));
+  $("#detail").replaceChildren(tabs, settings, stats);
   show("detail");
 }
 
@@ -1038,6 +1749,36 @@ let saved = null;
 try { saved = localStorage.getItem(KEY); } catch {}
 setAccent(HEX.test(saved || "") ? saved : PRESETS[0], false);
 show("home");
+
+/* Telegram: лёгкая вибрация на нажатия и цвет шапки под тему приложения. Вне Telegram ничего не делает. */
+try {
+  const tg = window.Telegram && window.Telegram.WebApp;
+  const tap = "button, .row, .tile, .pill, .swatch";
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(tap) && tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
+  }, true);
+  if (tg && tg.setHeaderColor) tg.setHeaderColor("bg_color");
+} catch {}
+
+/* Режим оформления: как в системе, светлый или тёмный. Выбор запоминается на устройстве. */
+const MODE_KEY = "csps-mode";
+let modeTimer = null;
+function applyMode(m, save = true) {
+  const root = document.documentElement;
+  if (m === "light" || m === "dark") root.dataset.theme = m;
+  else { delete root.dataset.theme; m = "system"; }
+  root.classList.add("theme-anim");
+  clearTimeout(modeTimer);
+  modeTimer = setTimeout(() => root.classList.remove("theme-anim"), 650);
+  document.querySelectorAll("[data-mode]").forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+  if (save) try { localStorage.setItem(MODE_KEY, m); } catch {}
+}
+document.querySelectorAll("[data-mode]").forEach((b) =>
+  b.addEventListener("click", () => applyMode(b.dataset.mode)));
+let savedMode = "system";
+try { savedMode = localStorage.getItem(MODE_KEY) || "system"; } catch {}
+applyMode(savedMode, false);
 </script>
 </body>
 </html>
