@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>CSPS Settings</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one column. Home is a hero with menu tiles; list, detail, theme and help are views
+   that fade and rise in. The accent is a registered custom property, so a theme change glides. */
+@property --accent { syntax: "<color>"; inherits: true; initial-value: #6d5efc; }
+@property --accent-ink { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+
+:root {
+  --accent: #6d5efc;
+  --accent-ink: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+  --bg: #f4f5f9;
+  --surface: #ffffff;
+  --fg: #14151c;
+  --muted: #6a6e80;
+  --line: #e2e4ee;
+  --radius: 18px;
+  --ease: cubic-bezier(.22, .8, .24, 1);
+  --ease-soft: cubic-bezier(.4, 0, .2, 1);
+  color-scheme: light;
+  transition: --accent .5s var(--ease-soft), --accent-ink .5s var(--ease-soft);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e0f14;
+    --surface: #171922;
+    --fg: #eceef6;
+    --muted: #9298ac;
+    --line: #272b39;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e0f14;
+  --surface: #171922;
+  --fg: #eceef6;
+  --muted: #9298ac;
+  --line: #272b39;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  transition: background-color .4s var(--ease-soft), color .4s var(--ease-soft);
+  -webkit-tap-highlight-color: transparent;
+}
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding-block: 16px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button, input { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+}
+.brand {
+  font-family: Unbounded, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.iconbtn {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 18px;
+  display: grid; place-items: center;
+  transition: transform .2s var(--ease), border-color .3s;
+}
+.iconbtn:hover { border-color: var(--accent); }
+.iconbtn:active, .tile:active, .btn:active, .row:active { transform: scale(.97); }
+
+.view:not([hidden]) { animation: rise .45s var(--ease) both; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.hero {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 24px;
+  padding: 22px;
+  margin-top: 8px;
+  transition: background-color .5s var(--ease-soft), color .5s var(--ease-soft);
+}
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: .85;
+}
+.hero h1, .hero-title, .title {
+  font-family: Unbounded, system-ui, sans-serif;
+  font-weight: 700;
+  text-wrap: balance;
+  margin: 0;
+  line-height: 1.2;
+}
+.hero h1 { font-size: 22px; }
+.hero-title { font-size: 26px; }
+.hero .sub { margin: 10px 0 0; opacity: .9; }
+.title { font-size: 20px; margin: 10px 0 14px; }
+
+.tiles {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+  margin-top: 16px;
+}
+@media (min-width: 480px) { .tiles { grid-template-columns: 1fr 1fr; } }
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition: transform .3s var(--ease), border-color .3s var(--ease-soft), box-shadow .3s var(--ease-soft);
+}
+.tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 24px -14px var(--accent);
+}
+.tile-t { font-weight: 700; font-size: 16px; }
+.tile-d { font-size: 13px; color: var(--muted); }
+
+.bar { padding: 4px 0; }
+.back {
+  background: none;
+  border: 0;
+  padding: 8px 0;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .2s, transform .2s var(--ease);
+}
+.back:hover { opacity: .75; transform: translateX(-2px); }
+
+.search {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  transition: border-color .25s var(--ease-soft), box-shadow .25s var(--ease-soft);
+}
+.search:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); outline: none; }
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 8px;
+}
+.row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  animation: rise .5s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+  transition: border-color .3s var(--ease-soft), transform .25s var(--ease), background-color .3s;
+}
+.row:hover { border-color: var(--accent); transform: translateX(3px); }
+.avatar {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid; place-items: center;
+  font-weight: 700;
+  flex: none;
+  transition: background-color .5s var(--ease-soft), color .5s var(--ease-soft);
+}
+.avatar-img { object-fit: cover; background: none; }
+.link-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color .25s, border-color .25s, transform .2s var(--ease);
+}
+.pill:hover { background: var(--accent-soft); border-color: var(--accent); }
+.pill:active { transform: scale(.96); }
+.grow { flex: 1; min-width: 0; display: grid; }
+.grow strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grow small { color: var(--muted); }
+.chev { color: var(--muted); font-size: 20px; transition: transform .3s var(--ease), color .3s; }
+.row:hover .chev { transform: translateX(3px); color: var(--accent); }
+.empty { color: var(--muted); padding: 12px 2px; }
+.elo {
+  font-family: Unbounded, system-ui, sans-serif;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  transition: color .5s var(--ease-soft);
+}
+.row.static { cursor: default; }
+.row.static:hover { transform: none; }
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  min-width: 0;
+  animation: rise .5s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 60ms + 80ms);
+}
+.stat b {
+  display: block;
+  font-family: Unbounded, system-ui, sans-serif;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.stat span { font-size: 12px; color: var(--muted); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-top: 12px;
+  min-width: 0;
+  animation: rise .5s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 60ms + 120ms);
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.label {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.ghost {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .25s, border-color .25s, transform .2s var(--ease);
+}
+.ghost:hover { background: var(--accent-soft); border-color: var(--accent); }
+.ghost:active { transform: scale(.96); }
+.ghost:disabled { opacity: .4; cursor: default; }
+.code-wrap {
+  margin: 10px 0 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fg) 5%, var(--surface));
+  overflow-x: auto;
+}
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 14px;
+  margin: 10px 0 0;
+}
+.kv dt { color: var(--muted); font-size: 13px; }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+.link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  transition: opacity .2s;
+}
+.link:hover { opacity: .75; }
+
+.picker-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+#picker {
+  width: 56px; height: 44px;
+  border: 0; padding: 0;
+  background: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+#hex { flex: 1; min-width: 0; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.swatch {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  background: var(--c);
+  cursor: pointer;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease-soft);
+}
+.swatch:hover { transform: scale(1.1); }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--fg); }
+.preview { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .2s var(--ease), box-shadow .3s var(--ease-soft);
+}
+.btn:hover { box-shadow: 0 8px 20px -10px var(--accent); }
+
+
+/* Photo fades into the page background at the bottom edge, so it reads as part of the surface. */
+.profile {
+  position: relative;
+  margin: 0 -16px;
+  height: 300px;
+  overflow: hidden;
+  animation: rise .6s var(--ease) both;
+}
+.profile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  display: block;
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+}
+.profile::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
+  transition: background .5s var(--ease-soft);
+}
+/* Crosshair generator */
+.xh-stage {
+  margin-top: 12px;
+  height: 240px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: background .4s var(--ease-soft);
+}
+#xh-svg { width: 200px; height: 200px; max-width: 100%; }
+.bg-dark { background: #0b0c10; }
+.bg-light { background: #e9ebf2; }
+.bg-map { background: linear-gradient(135deg, #3f4f3c 0%, #8a7556 50%, #2b3a4c 100%); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.seg button {
+  flex: 1 1 auto;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color .25s, border-color .25s, transform .2s var(--ease);
+}
+.seg button:hover { border-color: var(--accent); }
+.seg button:active { transform: scale(.97); }
+.seg button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.field { margin-top: 12px; }
+.field label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--muted);
+}
+.field output { color: var(--fg); font-variant-numeric: tabular-nums; font-weight: 600; }
+.field input[type="range"] { width: 100%; margin: 6px 0 0; accent-color: var(--accent); }
+.toggles { display: flex; gap: 10px; margin-top: 14px; }
+.toggle {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 14px;
+  cursor: pointer;
+}
+.toggle input { accent-color: var(--accent); width: 18px; height: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <span class="brand">CSPS</span>
+    <button class="iconbtn" data-go="theme" aria-label="Открыть тему">◐</button>
+  </header>
+
+  <main>
+    <section class="view" data-view="home">
+      <div class="hero">
+        <p class="eyebrow">Настройки про-игроков</p>
+        <h1>Копируй настройки в один тап</h1>
+        <p class="sub">Мышь, прицел, viewmodel и бинды лучших игроков в одном месте.</p>
+      </div>
+      <div class="tiles">
+        <button class="tile" data-go="list">
+          <span class="tile-t">Про-игроки</span>
+          <span class="tile-d" id="count"></span>
+        </button>
+        <button class="tile" data-go="crosshair">
+          <span class="tile-t">Генератор прицела</span>
+          <span class="tile-d">Превью и команды</span>
+        </button>
+        <button class="tile" data-go="faceit">
+          <span class="tile-t">Игроки Faceit</span>
+          <span class="tile-d">Настройки из Faceit</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="view" data-view="list" hidden>
+      <div class="bar"><button class="back" data-go="home">‹ Назад</button></div>
+      <h2 class="title">Про-игроки</h2>
+      <input id="search" class="search" type="search" placeholder="Ник или команда" autocomplete="off">
+      <ul id="plist" class="list"></ul>
+    </section>
+
+    <section class="view" data-view="detail" hidden>
+      <div class="bar"><button class="back" data-go="list">‹ Все игроки</button></div>
+      <div id="detail"></div>
+    </section>
+
+    <section class="view" data-view="theme" hidden>
+      <div class="bar"><button class="back" data-go="home">‹ Назад</button></div>
+      <h2 class="title">Тема</h2>
+      <div class="card" style="--i:0">
+        <p class="label">Цвет акцента</p>
+        <div class="picker-row">
+          <input id="picker" type="color" aria-label="Выбрать цвет">
+          <input id="hex" class="search" maxlength="7" aria-label="HEX-код цвета">
+        </div>
+        <p class="label" style="margin-top:16px">Готовые</p>
+        <div id="swatches" class="swatches"></div>
+      </div>
+      <div class="card preview" style="--i:1">
+        <p class="label" style="width:100%">Предпросмотр</p>
+        <button class="btn">Кнопка</button>
+        <button class="ghost" id="reset">Сбросить</button>
+      </div>
+    </section>
+
+    <section class="view" data-view="crosshair" hidden>
+      <div class="bar"><button class="back" data-go="home">‹ Назад</button></div>
+      <h2 class="title">Генератор прицела</h2>
+      <div id="xh-stage" class="xh-stage bg-dark">
+        <svg id="xh-svg" viewBox="0 0 200 200" role="img" aria-label="Превью прицела"></svg>
+      </div>
+      <div class="seg" role="group" aria-label="Фон превью">
+        <button data-bg="dark" aria-pressed="true">Тёмный</button>
+        <button data-bg="light" aria-pressed="false">Светлый</button>
+        <button data-bg="map" aria-pressed="false">Карта</button>
+      </div>
+      <div class="card" style="--i:0">
+        <p class="label">Масштаб превью</p>
+        <div class="seg">
+          <button data-zoom="1" aria-pressed="false">1×</button>
+          <button data-zoom="3" aria-pressed="true">3×</button>
+          <button data-zoom="5" aria-pressed="false">5×</button>
+        </div>
+        <p class="label" style="margin-top:16px">Форма</p>
+        <div class="seg">
+          <button data-shape="cross" aria-pressed="true">Крест</button>
+          <button data-shape="t" aria-pressed="false">T-образный</button>
+        </div>
+        <div class="field"><label for="xh-gap">Отступ от центра <output id="xh-gap-v"></output></label><input type="range" id="xh-gap" min="-10" max="20" step="1"></div>
+        <div class="field"><label for="xh-length">Длина <output id="xh-length-v"></output></label><input type="range" id="xh-length" min="0" max="30" step="1"></div>
+        <div class="field"><label for="xh-thickness">Толщина <output id="xh-thickness-v"></output></label><input type="range" id="xh-thickness" min="0.1" max="10" step="0.1"></div>
+        <div class="field"><label for="xh-alpha">Непрозрачность <output id="xh-alpha-v"></output></label><input type="range" id="xh-alpha" min="0" max="255" step="1"></div>
+        <div class="field"><label for="xh-outline-t">Толщина обводки <output id="xh-outline-t-v"></output></label><input type="range" id="xh-outline-t" min="0.5" max="4" step="0.5"></div>
+        <div class="field"><label for="xh-spread">Разброс (превью) <output id="xh-spread-v"></output></label><input type="range" id="xh-spread" min="0" max="20" step="1"></div>
+        <div class="toggles">
+          <label class="toggle"><span>Точка в центре</span><input type="checkbox" id="xh-dot"></label>
+          <label class="toggle"><span>Обводка</span><input type="checkbox" id="xh-outline"></label>
+        </div>
+        <p class="label" style="margin-top:16px">Цвет</p>
+        <div class="picker-row">
+          <input id="xh-color" type="color" aria-label="Цвет прицела">
+          <div id="xh-swatches" class="swatches"></div>
+        </div>
+      </div>
+      <div class="card" style="--i:1">
+        <p class="label">Пресеты</p>
+        <div class="seg">
+          <button data-preset="small">Маленький</button>
+          <button data-preset="classic">Классика</button>
+          <button data-preset="dot">Точка</button>
+          <button data-preset="tstyle">T-образный</button>
+        </div>
+        <p class="label" style="margin-top:16px">Мои слоты</p>
+        <div class="seg">
+          <button data-slot="0" aria-pressed="true">Слот 1</button>
+          <button data-slot="1" aria-pressed="false">Слот 2</button>
+          <button data-slot="2" aria-pressed="false">Слот 3</button>
+        </div>
+        <div class="seg">
+          <button id="xh-save">Сохранить</button>
+          <button id="xh-load">Загрузить</button>
+          <button id="xh-reset">Сбросить</button>
+        </div>
+      </div>
+      <div class="card" style="--i:2">
+        <div class="head">
+          <span class="label">Команды для консоли</span>
+          <button class="ghost" id="xh-copy">Копировать</button>
+        </div>
+        <pre class="code-wrap"><code id="xh-cmd" class="code"></code></pre>
+        <p class="note">Вставь в консоль CS2 (клавиша ё). Если что-то не совпадает, проверь значения в настройках игры.</p>
+      </div>
+    </section>
+
+    <section class="view" data-view="faceit" hidden>
+      <div class="bar"><button class="back" data-go="home">‹ Назад</button></div>
+      <h2 class="title">Игроки Faceit</h2>
+      <ul id="faceit" class="list"></ul>
+    </section>
+  </main>
+</div>
+
+<script>
+const PLAYERS = [
+  { nick: "Monesy", team: "Илья Осипов",
+    mouse: "Logitech G Pro X Superlight 2 White · 2000 Hz · Windows sens 6 · zoom 1",
+    dpi: "400", sens: "2.3",
+    crosshair: "CSGO-wAD3c-ykt5L-zvZ98-vBisR-6sWPA",
+    viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5",
+    video: "1280x960, 4:3 растянутое · ZOWIE XL2586X+ (600 Hz): DyAc 2 Premium, Black eQualizer 12, Color Vibrance 12, Low Blue Light 0, Gamer 1, яркость 100, контраст 50, резкость 10, Gamma 2, Normal, AMA High",
+    audio: "—", binds: "—", source: "", photo: "monesy.jpg",
+    links: [["HLTV", "https://www.hltv.org/player/19230/m0nesy"]] },
+  { nick: "donk", team: "Team Spirit",
+    mouse: "Logitech G Pro X Superlight Magenta · 1000 Hz · Windows sens 4 · zoom 1",
+    dpi: "800", sens: "1.25",
+    crosshair: "CSGO-NmcdV-ORLFj-vKC4W-LV6zW-4fWjM",
+    viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 2",
+    video: "1280x960, 4:3 растянутое, полноэкран · ZOWIE XL2586X+ (600 Hz), Gamer 2, Gamma 2, DyAc Premium",
+    audio: "—", binds: "—",
+    graphics: "Boost Players Contrast вкл · модели, текстуры, шейдеры, частицы: низкая · фильтрация Trilinear · MSAA 8x · тени: высокая · окружающее затенение выкл · FSR выкл · NVIDIA Reflex выкл · G-Sync выкл",
+    source: "", photo: "donk.webp",
+    links: [["HLTV", "https://www.hltv.org/player/21167/donk"]] },
+  { nick: "Kyousuke", team: "Максим Лукин",
+    mouse: "Logitech G Pro X Superlight 2 Magenta · 1000 Hz · Windows sens 6 · zoom 1",
+    dpi: "800", sens: "1.28",
+    crosshair: "CSb7uHXB989YebCcoiuafDiUKZntFPoXCVySN5sMcwOAYF",
+    viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 1",
+    video: "1280x960, 4:3 растянутое, полноэкран, яркость 110% · HUD: Team Color, масштаб 1 · радар: масштаб 1, зум карты 0.3",
+    audio: "—", binds: "—",
+    graphics: "Boost Player Contrast выкл · V-Sync выкл · NVIDIA Reflex выкл · G-Sync выкл · FPS 500 · MSAA 8x · тени: глобальные низкие, динамические все · модели и текстуры низкие · фильтрация Bilinear · шейдеры низкие · частицы низкие · AO выкл · FSR выкл",
+    source: "" },
+  { nick: "focusbtw", team: "Ютубер", faceit: true,
+    mouse: "—", dpi: "—", sens: "—",
+    crosshair: "CSGO-8hdPr-VQFmM-aHpHS-ZrP38-3ZywQ",
+    viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_z -1.5",
+    video: "HUD: cl_hud_color 3, cl_showloadout true, safezonex 1, safezoney 1 · радар: cl_hud_radar_scale 1, cl_radar_scale 0.35, центр на игроке, вращение, cl_radar_icon_scale_min 0.5",
+    audio: "—", binds: "—",
+    graphics: "Параметры запуска: -novid -language english -tickrate 128 +cl_interp_ratio 1 -freq 240",
+    source: "" },
+  { nick: "ZywOo", team: "—",
+    mouse: "Pulsar ZywOo The Chosen Mouse Gen.2 · 1000 Hz · Windows sens 6 · zoom 1",
+    dpi: "400", sens: "1.9",
+    crosshair: "CSH2Rx7cGRU5apQ4VSnZwjsr9RyLEiOrCAaVYWYvW6dz7H",
+    viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 1",
+    video: "1024x768, 4:3 растянутое, полноэкран, яркость 93% · HUD: Team Color, масштаб 1 · радар: масштаб 1, зум карты 0.4",
+    audio: "—", binds: "—",
+    graphics: "Boost Player Contrast вкл · V-Sync выкл · NVIDIA Reflex вкл · G-Sync выкл · FPS 400 · MSAA 4x · тени: глобальные высокие, динамические все · модели и текстуры высокие · фильтрация Anisotropic 4x · шейдеры высокие · частицы высокие · AO средняя · FSR выкл · параметры запуска: -novid -tickrate 128 -allow_third_party_software",
+    source: "" },
+  { nick: "sh1ro", team: "—",
+    mouse: "Logitech G Pro X Superlight 2 White · 1000 Hz · Windows sens 6 · zoom 1",
+    dpi: "800", sens: "1.04",
+    crosshair: "CSHMaMsuZ4tkuSMkpx6ajXU9XyuWcjcxMG5nKQKj8STPGH",
+    viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 1",
+    video: "1280x960, 4:3 растянутое, полноэкран, яркость 93% · HUD: White, масштаб 1.05 · радар: масштаб 1.05",
+    audio: "—", binds: "—",
+    graphics: "Boost Player Contrast вкл · V-Sync выкл · NVIDIA Reflex вкл · G-Sync выкл · FPS 500 · MSAA 4x · тени: глобальные высокие, динамические все · модели и текстуры высокие · фильтрация Anisotropic 2x · шейдеры высокие · частицы высокие · AO средняя · FSR выкл · параметры запуска: -console +exec autoexec.cfg",
+    source: "" },
+  { nick: "s1mple", team: "Александр Костылев",
+    mouse: "Logitech G Pro X Superlight 2 Cyan · 1000 Hz · Windows sens 6 · zoom 1",
+    dpi: "400", sens: "3.09",
+    crosshair: "CSvA37Mou5tyXnWY3mN5u6UpZsmo8ryb5XW8b4wJdmsO3Z",
+    viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 2",
+    video: "1280x960, 4:3 растянутое, полноэкран, яркость 110% · HUD: Aqua, масштаб 1 · радар: масштаб 0.83, зум карты 0.45",
+    audio: "—", binds: "—",
+    graphics: "Boost Player Contrast выкл · V-Sync выкл · NVIDIA Reflex выкл · G-Sync выкл · FPS без ограничения · MSAA 8x · тени: глобальные высокие, динамические все · модели и текстуры низкие · фильтрация Bilinear · шейдеры низкие · частицы низкие · AO выкл · FSR выкл · параметры запуска: -freq 360 -novid -console +fps_max 999",
+    source: "", photo: "s1mple.jpg" },
+  { nick: "Deko", team: "Денис Жуков", faceit: true,
+    mouse: "Endgame Gear OP1w 4K v2 Black · 2000 Hz · Windows sens 6 · zoom 1.15",
+    dpi: "800", sens: "1.2",
+    crosshair: "CSdsRHm2zoU5JDFt6LcPkyH7iyMxsqnSEqO9fe8BjdxcuU",
+    viewmodel: "viewmodel_fov 68; viewmodel_offset_x 2.5; viewmodel_offset_y 0; viewmodel_offset_z -1.5; viewmodel_presetpos 1",
+    video: "1280x960, 4:3 растянутое, полноэкран, яркость 88% · HUD: фиолетовый, масштаб 1 · радар: центр на игроке, вращается",
+    audio: "—", binds: "—",
+    graphics: "Boost Player Contrast вкл · V-Sync выкл · NVIDIA Reflex вкл · G-Sync выкл · Maximum FPS 600 · MSAA 4x · тени: глобальные высокие, динамические все · модели и текстуры низкие · фильтрация Bilinear · шейдеры низкие · частицы низкие · AO выкл · FSR выкл",
+    source: "", photo: "deko.jpg",
+    links: [["Faceit", "https://www.faceit.com/en/players/deko-_-"]],
+    stats: { elo: "3650", last30: "21 W / 9 L", kd: "1.41", kr: "0.91", hs: "37%", adr: "94.6", winrate: "70%" } }
+];
+
+const PRESETS = ["#6d5efc", "#e5484d", "#f76b15", "#30a46c", "#0091ff", "#d6409f"];
+const KEY = "csps-accent";
+const HEX = /^#[0-9a-f]{6}$/i;
+
+const $ = (s) => document.querySelector(s);
+
+// Builds elements safely: text is set as text, never as HTML.
+function el(tag, props, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n[k] = v;
+    else n.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) {
+    if (c === null || c === undefined || c === false) continue;
+    n.append(c instanceof Node ? c : document.createTextNode(String(c)));
+  }
+  return n;
+}
+
+function show(name) {
+  document.querySelectorAll(".view").forEach((v) => { v.hidden = v.dataset.view !== name; });
+  if (name === "list") renderList($("#search").value);
+  if (name === "faceit") renderFaceit();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderList(query) {
+  const q = query.trim().toLowerCase();
+  const items = PLAYERS.filter((p) =>
+    !p.faceit && (!q || p.nick.toLowerCase().includes(q) || p.team.toLowerCase().includes(q)));
+  const list = $("#plist");
+  if (!items.length) {
+    list.replaceChildren(el("li", { class: "empty", text: "Никого не нашёл." }));
+    return;
+  }
+  list.replaceChildren(...items.map((p, i) =>
+    el("li", {},
+      el("button", { class: "row", style: `--i:${i}`, onclick: () => openPlayer(p) },
+        p.photo
+          ? el("img", { class: "avatar avatar-img", src: p.photo, alt: "" })
+          : el("span", { class: "avatar", text: p.nick.slice(-1) }),
+        el("span", { class: "grow" },
+          el("strong", { text: p.nick }),
+          el("small", { text: p.team })),
+        el("span", { class: "chev", "aria-hidden": "true", text: "›" })))));
+}
+
+function renderFaceit() {
+  const list = PLAYERS.filter((p) => p.faceit);
+  $("#faceit").replaceChildren(...list.map((p, i) =>
+    el("li", {},
+      el("button", { class: "row", style: `--i:${i}`, onclick: () => openPlayer(p) },
+        p.photo
+          ? el("img", { class: "avatar avatar-img", src: p.photo, alt: "" })
+          : el("span", { class: "avatar", text: p.nick.slice(-1) }),
+        el("span", { class: "grow" },
+          el("strong", { text: p.nick }),
+          el("small", { text: p.team })),
+        el("span", { class: "chev", "aria-hidden": "true", text: "›" })))));
+}
+
+function edpi(p) {
+  const v = parseFloat(p.dpi) * parseFloat(p.sens);
+  return Number.isFinite(v) ? String(+v.toFixed(2)) : "—";
+}
+
+function stat(label, value, i) {
+  return el("div", { class: "stat", style: `--i:${i}` },
+    el("b", { text: value || "—" }), el("span", { text: label }));
+}
+
+function kv(key, value) {
+  return [el("dt", { text: key }), el("dd", { text: value || "—" })];
+}
+
+async function copy(text, codeEl, btn) {
+  const old = btn.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = "Скопировано";
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(codeEl);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    btn.textContent = "Выдели и скопируй";
+  }
+  setTimeout(() => { btn.textContent = old; }, 1600);
+}
+
+function block(label, text, i) {
+  const code = el("code", { class: "code", text: text || "—" });
+  const btn = el("button", { class: "ghost", text: "Копировать" });
+  if (!text) btn.disabled = true;
+  btn.onclick = () => copy(text, code, btn);
+  return el("section", { class: "card", style: `--i:${i}` },
+    el("div", { class: "head" }, el("span", { class: "label", text: label }), btn),
+    el("pre", { class: "code-wrap" }, code));
+}
+
+function faceitCard(s, i) {
+  return el("div", { class: "card", style: `--i:${i}` },
+    el("div", { class: "head" },
+      el("span", { class: "label", text: "Faceit · последние 30 матчей" }),
+      el("b", { class: "elo", text: `ELO ${s.elo}` })),
+    el("div", { class: "stats" },
+      stat("Побед / поражений", s.last30, 0), stat("Винрейт", s.winrate, 1), stat("K/D", s.kd, 2)),
+    el("div", { class: "stats" },
+      stat("K/R", s.kr, 0), stat("HS%", s.hs, 1), stat("ADR", s.adr, 2)));
+}
+
+function linksCard(links, i) {
+  return el("div", { class: "card", style: `--i:${i}` },
+    el("p", { class: "label", text: "Профили" }),
+    el("div", { class: "link-row" },
+      ...links.map(([name, url]) =>
+        el("a", { class: "pill", href: url, target: "_blank", rel: "noopener", text: name }))));
+}
+
+function openPlayer(p) {
+  $("#detail").replaceChildren(...[
+    p.photo ? el("div", { class: "profile" }, el("img", { src: p.photo, alt: p.nick })) : null,
+    el("div", { class: "hero" },
+      el("p", { class: "eyebrow", text: p.team }),
+      el("h2", { class: "hero-title", text: p.nick })),
+    el("div", { class: "stats" },
+      stat("DPI", p.dpi, 0), stat("Сенс", p.sens, 1), stat("eDPI", edpi(p), 2)),
+    block("Прицел", p.crosshair, 3),
+    block("Viewmodel", p.viewmodel, 4),
+    el("div", { class: "card", style: "--i:5" },
+      el("p", { class: "label", text: "Железо и настройки" }),
+      el("dl", { class: "kv" }, kv("Мышь", p.mouse), kv("Видео", p.video), kv("Звук", p.audio), kv("Бинды", p.binds), kv("Графика", p.graphics))),
+    p.stats ? faceitCard(p.stats, 6) : null,
+    p.links ? linksCard(p.links, 7) : null,
+    p.source ? el("a", { class: "link", href: p.source, target: "_blank", rel: "noopener" }, "Источник ↗") : null
+  ].filter(Boolean));
+  show("detail");
+}
+
+function inkFor(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const lum = ((n >> 16) * 0.299 + ((n >> 8) & 255) * 0.587 + (n & 255) * 0.114) / 255;
+  return lum > 0.6 ? "#111218" : "#ffffff";
+}
+
+function setAccent(hex, save = true) {
+  const root = document.documentElement.style;
+  root.setProperty("--accent", hex);
+  root.setProperty("--accent-ink", inkFor(hex));
+  $("#picker").value = hex;
+  $("#hex").value = hex;
+  document.querySelectorAll("[data-swatch]").forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.dataset.swatch === hex)));
+  if (save) { try { localStorage.setItem(KEY, hex); } catch {} }
+}
+
+// Navigation: any element with data-go switches view.
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-go]");
+  if (t) show(t.dataset.go);
+});
+
+/* Crosshair generator: preview is an SVG drawn from the same numbers the console commands use. */
+const NS = "http://www.w3.org/2000/svg";
+const XH_DEFAULT = { shape: "cross", gap: -2, length: 3, thickness: 1, dot: false, outline: true, outlineT: 1, alpha: 255, color: "#00ff00", spread: 0 };
+const XH_PRESET_LIST = {
+  small: XH_DEFAULT,
+  classic: { shape: "cross", gap: 3, length: 8, thickness: 2, dot: false, outline: true, outlineT: 1, alpha: 255, color: "#ffffff", spread: 0 },
+  dot: { shape: "cross", gap: 0, length: 0, thickness: 2, dot: true, outline: true, outlineT: 1, alpha: 255, color: "#00ffff", spread: 0 },
+  tstyle: { shape: "t", gap: 2, length: 6, thickness: 1.5, dot: false, outline: false, outlineT: 1, alpha: 255, color: "#ffff00", spread: 0 }
+};
+const XH_RANGES = { gap: "xh-gap", length: "xh-length", thickness: "xh-thickness", alpha: "xh-alpha", outlineT: "xh-outline-t", spread: "xh-spread" };
+const XH_COLORS = ["#00ff00", "#ffffff", "#ffff00", "#00ffff", "#ff0000", "#ff00ff"];
+const XH_SLOTS_KEY = "csps-xh-slots";
+let XH = { ...XH_DEFAULT };
+let xhSlot = 0;
+let xhZoom = 3;
+
+function xhRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function drawXh() {
+  const svg = $("#xh-svg");
+  const S = xhZoom, c = 100;
+  const g = (XH.gap + XH.spread) * S;
+  const L = XH.length * S;
+  const T = XH.thickness * S;
+  const O = XH.outline ? XH.outlineT * S : 0;
+  const [r, gg, b] = xhRgb(XH.color);
+  const a = XH.alpha / 255;
+  const rects = [];
+  if (L > 0) {
+    if (XH.shape !== "t") rects.push([c - T / 2, c - g - L, T, L]);
+    rects.push([c - T / 2, c + g, T, L]);
+    rects.push([c - g - L, c - T / 2, L, T]);
+    rects.push([c + g, c - T / 2, L, T]);
+  }
+  if (XH.dot) rects.push([c - T / 2, c - T / 2, T, T]);
+  const paint = (list, fill) => list.forEach(([x, y, w, h]) => {
+    if (w <= 0 || h <= 0) return;
+    const n = document.createElementNS(NS, "rect");
+    n.setAttribute("x", x); n.setAttribute("y", y);
+    n.setAttribute("width", w); n.setAttribute("height", h);
+    n.setAttribute("fill", fill);
+    svg.append(n);
+  });
+  svg.replaceChildren();
+  svg.setAttribute("shape-rendering", "crispEdges");
+  if (O > 0) paint(rects.map(([x, y, w, h]) => [x - O, y - O, w + 2 * O, h + 2 * O]), `rgba(0,0,0,${a})`);
+  paint(rects, `rgba(${r},${gg},${b},${a})`);
+}
+
+function xhCommands() {
+  const [r, g, b] = xhRgb(XH.color);
+  return [
+    "cl_crosshairstyle 4",
+    `cl_crosshair_t ${XH.shape === "t" ? 1 : 0}`,
+    `cl_crosshairgap ${XH.gap}`,
+    `cl_crosshairsize ${XH.length}`,
+    `cl_crosshairthickness ${XH.thickness}`,
+    `cl_crosshairdot ${XH.dot ? 1 : 0}`,
+    `cl_crosshair_drawoutline ${XH.outline ? 1 : 0}`,
+    `cl_crosshair_outlinethickness ${XH.outlineT}`,
+    `cl_crosshaircolor_r ${r}`,
+    `cl_crosshaircolor_g ${g}`,
+    `cl_crosshaircolor_b ${b}`,
+    `cl_crosshairalpha ${XH.alpha}`,
+    "cl_crosshairusealpha true",
+    `cl_crosshair_dynamic_splitdist ${XH.spread}`,
+    "cl_crosshair_recoil false"
+  ].join("; ") + ";";
+}
+
+function xhChanged() {
+  drawXh();
+  $("#xh-cmd").textContent = xhCommands();
+}
+
+function xhSync() {
+  for (const [k, id] of Object.entries(XH_RANGES)) {
+    $("#" + id).value = XH[k];
+    $(`#${id}-v`).textContent = XH[k];
+  }
+  $("#xh-dot").checked = XH.dot;
+  $("#xh-outline").checked = XH.outline;
+  $("#xh-color").value = XH.color;
+  document.querySelectorAll("[data-shape]").forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.dataset.shape === XH.shape)));
+  document.querySelectorAll("[data-xc]").forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.dataset.xc === XH.color)));
+  xhChanged();
+}
+
+function setBg(name) {
+  $("#xh-stage").className = "xh-stage bg-" + name;
+  document.querySelectorAll("[data-bg]").forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.dataset.bg === name)));
+}
+
+function xhSlots() {
+  try {
+    const v = JSON.parse(localStorage.getItem(XH_SLOTS_KEY) || "null");
+    if (Array.isArray(v) && v.length === 3) return v;
+  } catch {}
+  return [null, null, null];
+}
+
+function saveSlots(s) {
+  try { localStorage.setItem(XH_SLOTS_KEY, JSON.stringify(s)); } catch {}
+}
+
+function xhSlotsUI() {
+  const s = xhSlots();
+  document.querySelectorAll("[data-slot]").forEach((b) => {
+    const i = +b.dataset.slot;
+    b.textContent = `Слот ${i + 1}${s[i] ? " ●" : ""}`;
+    b.setAttribute("aria-pressed", String(i === xhSlot));
+  });
+}
+
+function flash(btn, msg) {
+  const old = btn.textContent;
+  btn.textContent = msg;
+  setTimeout(() => { btn.textContent = old; }, 1400);
+}
+
+function xhInit() {
+  $("#xh-swatches").replaceChildren(...XH_COLORS.map((c) =>
+    el("button", { class: "swatch", "data-xc": c, style: `--c:${c}`, "aria-label": c,
+      onclick: () => { XH.color = c; xhSync(); } })));
+  for (const [k, id] of Object.entries(XH_RANGES)) {
+    $("#" + id).addEventListener("input", (e) => {
+      XH[k] = parseFloat(e.target.value);
+      $(`#${id}-v`).textContent = XH[k];
+      xhChanged();
+    });
+  }
+  $("#xh-dot").addEventListener("change", (e) => { XH.dot = e.target.checked; xhChanged(); });
+  $("#xh-outline").addEventListener("change", (e) => { XH.outline = e.target.checked; xhChanged(); });
+  $("#xh-color").addEventListener("input", (e) => { XH.color = e.target.value; xhSync(); });
+  document.querySelectorAll("[data-shape]").forEach((b) =>
+    b.addEventListener("click", () => { XH.shape = b.dataset.shape; xhSync(); }));
+  document.querySelectorAll("[data-bg]").forEach((b) =>
+    b.addEventListener("click", () => setBg(b.dataset.bg)));
+  document.querySelectorAll("[data-preset]").forEach((b) =>
+    b.addEventListener("click", () => { XH = { ...XH_PRESET_LIST[b.dataset.preset] }; xhSync(); }));
+  document.querySelectorAll("[data-slot]").forEach((b) =>
+    b.addEventListener("click", () => { xhSlot = +b.dataset.slot; xhSlotsUI(); }));
+  $("#xh-save").addEventListener("click", (e) => {
+    const s = xhSlots();
+    s[xhSlot] = { ...XH };
+    saveSlots(s);
+    xhSlotsUI();
+    flash(e.currentTarget, "Сохранено");
+  });
+  $("#xh-load").addEventListener("click", (e) => {
+    const s = xhSlots()[xhSlot];
+    if (s) { XH = { ...s }; xhSync(); }
+    else flash(e.currentTarget, "Слот пуст");
+  });
+  $("#xh-reset").addEventListener("click", () => { XH = { ...XH_DEFAULT }; xhSync(); });
+  $("#xh-copy").addEventListener("click", (e) => copy(xhCommands(), $("#xh-cmd"), e.currentTarget));
+  document.querySelectorAll("[data-zoom]").forEach((b) =>
+    b.addEventListener("click", () => {
+      xhZoom = +b.dataset.zoom;
+      document.querySelectorAll("[data-zoom]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      xhChanged();
+    }));
+  setBg("dark");
+  xhSlotsUI();
+  xhSync();
+}
+xhInit();
+
+if (window.Telegram && window.Telegram.WebApp) {
+  Telegram.WebApp.ready();
+  Telegram.WebApp.expand();
+}
+
+$("#count").textContent =`${PLAYERS.length} игроков`;
+$("#search").addEventListener("input", (e) => renderList(e.target.value));
+$("#picker").addEventListener("input", (e) => setAccent(e.target.value));
+$("#hex").addEventListener("input", (e) => {
+  const v = e.target.value.trim();
+  if (HEX.test(v)) setAccent(v.toLowerCase());
+});
+$("#reset").addEventListener("click", () => {
+  try { localStorage.removeItem(KEY); } catch {}
+  setAccent(PRESETS[0], false);
+});
+
+$("#swatches").replaceChildren(...PRESETS.map((c) =>
+  el("button", { class: "swatch", "data-swatch": c, style: `--c:${c}`, "aria-label": c, onclick: () => setAccent(c) })));
+
+let saved = null;
+try { saved = localStorage.getItem(KEY); } catch {}
+setAccent(HEX.test(saved || "") ? saved : PRESETS[0], false);
+show("home");
+</script>
+</body>
+</html>
